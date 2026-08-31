@@ -1,5 +1,5 @@
 name = "voila-floor"
-compatibility_date = "2026-09-01"
+compatibility_date = "2026-08-31"
 pages_build_output_dir = "./dist"
 
 # Cloudflare Pages project root should be set to: website
