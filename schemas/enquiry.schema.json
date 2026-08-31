@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Voila Floor Enquiry Extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["customer_name","email","phone","job_address","suburb","postcode","customer_type","service","message","measurements","preferred_timing","attachments_present","missing_fields","risk_flags","confidence"],
+  "properties": {
+    "customer_name":{"type":"string"},"email":{"type":"string"},"phone":{"type":"string"},"job_address":{"type":"string"},"suburb":{"type":"string"},"postcode":{"type":"string"},
+    "customer_type":{"type":"string","enum":["domestic","commercial","property_manager","unknown"]},
+    "service":{"type":"string","enum":["carpet_cleaning","upholstery_cleaning","tile_grout","hard_floor","hard_floor_restoration","restoration_review","unknown"]},
+    "message":{"type":"string"},"measurements":{"type":"string"},"preferred_timing":{"type":"string"},"attachments_present":{"type":"boolean"},
+    "missing_fields":{"type":"array","items":{"type":"string"}},"risk_flags":{"type":"array","items":{"type":"string"}},"confidence":{"type":"number","minimum":0,"maximum":1}
+  }
+}
