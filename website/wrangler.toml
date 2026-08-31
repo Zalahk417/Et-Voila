@@ -1,0 +1,11 @@
+name = "voila-floor"
+compatibility_date = "2026-09-01"
+pages_build_output_dir = "./dist"
+
+# Cloudflare Pages project root should be set to: website
+# Build command: python build.py
+# Build output: dist
+# Functions live in: functions/
+#
+# Production secret required before enquiry forwarding is enabled:
+# N8N_LEAD_WEBHOOK_URL
