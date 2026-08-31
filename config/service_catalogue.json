@@ -1,0 +1,111 @@
+{
+  "brand": "Voila Floor Cleaning & Restoration",
+  "version": "2026-08-31",
+  "customer_segments": [
+    "residential",
+    "commercial",
+    "strata",
+    "property_management",
+    "recurring_contractor",
+    "tender_subcontract"
+  ],
+  "website_groups": [
+    {
+      "id": "carpet",
+      "name": "Carpet Cleaning & Restoration",
+      "slug": "/services/carpet-cleaning",
+      "services": [
+        "Hot Water Extraction (HWE)",
+        "Encapsulation / low-moisture carpet cleaning",
+        "Wool carpet specialist cleaning",
+        "Stain and spot removal",
+        "Urine contamination extraction and odour treatment",
+        "Carpet repairs"
+      ]
+    },
+    {
+      "id": "upholstery_leather",
+      "name": "Upholstery & Leather Care",
+      "slug": "/services/upholstery-leather",
+      "services": [
+        "Fabric upholstery cleaning",
+        "Leather cleaning and conditioning"
+      ]
+    },
+    {
+      "id": "tile_grout",
+      "name": "Tile & Grout Cleaning",
+      "slug": "/services/tile-grout-cleaning",
+      "services": [
+        "Tile and grout deep cleaning",
+        "High-pressure tile and grout sanitation cleaning"
+      ]
+    },
+    {
+      "id": "natural_stone",
+      "name": "Natural Stone Cleaning & Protection",
+      "slug": "/services/natural-stone",
+      "services": [
+        "Natural stone cleaning",
+        "Natural stone sealing / impregnation"
+      ]
+    },
+    {
+      "id": "vinyl_resilient",
+      "name": "Vinyl & Resilient Floor Care",
+      "slug": "/services/vinyl-resilient-floors",
+      "services": [
+        "Vinyl floor deep cleaning",
+        "Strip and seal",
+        "Recoat / top-coat maintenance",
+        "Buffing / burnishing"
+      ]
+    },
+    {
+      "id": "concrete_epoxy",
+      "name": "Concrete & Epoxy Floor Care",
+      "slug": "/services/concrete-epoxy",
+      "services": [
+        "Concrete floor deep cleaning",
+        "Epoxy floor cleaning and maintenance"
+      ]
+    },
+    {
+      "id": "gym_rubber",
+      "name": "Gym & Rubber Flooring",
+      "slug": "/services/gym-rubber-flooring",
+      "services": [
+        "Rubber tile deep cleaning",
+        "Rolled rubber and specialist gym flooring cleaning"
+      ]
+    },
+    {
+      "id": "sealing_finishing",
+      "name": "Floor Sealing, Recoating & Finishing",
+      "slug": "/services/floor-sealing-finishing",
+      "services": [
+        "Micron / penetrating floor sealing",
+        "Natural stone sealing",
+        "Strip and seal",
+        "Floor recoating",
+        "Buffing / burnishing"
+      ]
+    },
+    {
+      "id": "commercial_programs",
+      "name": "Commercial, Strata & Contract Floor Care",
+      "slug": "/commercial",
+      "services": [
+        "Commercial and strata recurring floor-care programs",
+        "Recurring contractor / subcontract floor-care",
+        "Technical floor-care packages within larger tenders"
+      ]
+    }
+  ],
+  "automation_rules": {
+    "pricing": "AI may select or suggest approved catalogue items but may not invent rates or commit a final customer price.",
+    "high_risk": "Water damage, mould, biohazard, hazardous contamination, asbestos, insurance/liability and guarantee requests always require human review.",
+    "method_selection": "HWE, encapsulation, pressure, chemistry, sealing and finish systems are selected after fibre/substrate/site assessment; the website must not promise a method before assessment where suitability is uncertain.",
+    "commercial_tenders": "Voila Floor may quote only the specialist technical floor-care component of a broader tender unless the full scope is expressly accepted."
+  }
+}
