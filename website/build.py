@@ -7,6 +7,7 @@ import zipfile
 HERE = Path(__file__).resolve().parent
 DIST = HERE / "dist"
 ARCHIVE = HERE / "archive"
+CONTENT = HERE / "content"
 PARTS = [
     "part-01.b64",
     "part-02.b64",
@@ -32,6 +33,9 @@ def main() -> None:
             if target != root and root not in target.parents:
                 raise RuntimeError(f"Unsafe archive path: {member.filename}")
         archive.extractall(DIST)
+
+    if CONTENT.exists():
+        shutil.copytree(CONTENT, DIST, dirs_exist_ok=True)
 
     files = sum(1 for path in DIST.rglob("*") if path.is_file())
     print(f"Voila Floor website built: {files} static files -> {DIST}")
