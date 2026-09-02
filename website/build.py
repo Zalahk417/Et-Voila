@@ -4,6 +4,13 @@ import io
 import shutil
 import zipfile
 
+from copy_replacements import (
+    GLOBAL_REPLACEMENTS,
+    PAGE_REPLACEMENTS,
+    SERVICE_PATHS,
+    SERVICE_REPLACEMENTS,
+)
+
 HERE = Path(__file__).resolve().parent
 DIST = HERE / "dist"
 ARCHIVE = HERE / "archive"
@@ -84,6 +91,42 @@ def add_public_phone_details() -> None:
     site_js.write_text(javascript, encoding="utf-8")
 
 
+def simplify_customer_copy() -> None:
+    html_paths = list(DIST.rglob("*.html"))
+    pages = {
+        html_path.relative_to(DIST).as_posix(): html_path.read_text(encoding="utf-8")
+        for html_path in html_paths
+    }
+
+    for old, new, minimum_count in GLOBAL_REPLACEMENTS:
+        found = sum(html.count(old) for html in pages.values())
+        if found < minimum_count:
+            raise RuntimeError(
+                f"Global copy replacement was found {found} times, expected at least "
+                f"{minimum_count}: {old}"
+            )
+        pages = {path: html.replace(old, new) for path, html in pages.items()}
+
+    for path in SERVICE_PATHS:
+        if path not in pages:
+            raise RuntimeError(f"Service page is missing from build output: {path}")
+        for old, new in SERVICE_REPLACEMENTS:
+            if old not in pages[path]:
+                raise RuntimeError(f"Service copy was not found in {path}: {old}")
+            pages[path] = pages[path].replace(old, new)
+
+    for path, replacements in PAGE_REPLACEMENTS.items():
+        if path not in pages:
+            raise RuntimeError(f"Copy target page is missing from build output: {path}")
+        for old, new in replacements:
+            if old not in pages[path]:
+                raise RuntimeError(f"Page copy was not found in {path}: {old}")
+            pages[path] = pages[path].replace(old, new)
+
+    for path, html in pages.items():
+        (DIST / path).write_text(html, encoding="utf-8")
+
+
 def main() -> None:
     if DIST.exists():
         shutil.rmtree(DIST)
@@ -104,6 +147,7 @@ def main() -> None:
         shutil.copytree(CONTENT, DIST, dirs_exist_ok=True)
 
     add_public_phone_details()
+    simplify_customer_copy()
 
     files = sum(1 for path in DIST.rglob("*") if path.is_file())
     print(f"Voila Floor website built: {files} static files -> {DIST}")
