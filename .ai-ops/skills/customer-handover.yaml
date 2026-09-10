@@ -1,0 +1,53 @@
+schema_version: '1.0'
+id: voila.customer-handover
+name: Voilà — Customer Handover Booklet
+version: 1.0.0
+purpose: Produce a consistent post-service customer handover booklet and reusable marketing photo candidates.
+trigger:
+  - servicem8_job_completed
+  - manual_request
+inputs:
+  - job_record
+  - customer_details
+  - service_details
+  - job_photos
+  - current_brand_standard
+sources_of_truth:
+  - ServiceM8 job record
+  - Voilà brand standard
+  - approved booklet standard
+procedure:
+  - retrieve job and associated photographs
+  - match likely before and after pairs by subject, room, angle and treatment stage
+  - rank pairs for clarity, credibility and visible improvement
+  - reject misleading, weak or mismatched pairs
+  - generate booklet using current layout, typography, service summary, care advice and review CTA
+  - verify customer details, service details, orientation, duplication, legibility and branding
+  - ensure no Jim's branding or protected franchise IP remains
+  - save final booklet and flag strongest marketing candidates
+  - record execution evidence
+  - run Inspector General quality gate before delivery
+authority:
+  generate: AUTONOMOUS
+  deliver: AUTO-WITH-LIMITS
+  resolve_dispute: OWNER APPROVAL
+  bypass_quality_gate: PROHIBITED
+quality_gates:
+  - correct customer and job
+  - correct service
+  - no duplicate or mismatched before and after pair
+  - no Jim's branding or protected franchise IP
+  - review CTA works
+  - final artifact opens correctly
+outputs:
+  - customer_booklet
+  - marketing_candidates
+  - execution_record
+escalation:
+  - missing_usable_photos
+  - disputed_work
+  - privacy_concern
+  - incorrect_job_linkage
+audit:
+  owner: Inspector General
+  frequency: weekly
