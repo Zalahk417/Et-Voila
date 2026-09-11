@@ -3,9 +3,13 @@ compatibility_date = "2026-08-31"
 pages_build_output_dir = "./dist"
 
 # Cloudflare Pages project root should be set to: website
-# Build command: python build.py
+# Build command: python predeploy.py
 # Build output: dist
 # Functions live in: functions/
+#
+# IMPORTANT: JCC Geraldton remains the live customer-facing brand.
+# Leave VOILA_PUBLIC_LAUNCH unset in Cloudflare production until the owner-approved
+# Voilà public cutover. predeploy.py blocks main-branch production builds otherwise.
 #
 # Production secret required before enquiry forwarding is enabled:
 # N8N_LEAD_WEBHOOK_URL
