@@ -17,8 +17,6 @@ class WebsiteBuildAcceptanceTest(unittest.TestCase):
             [sys.executable, "build.py"],
             cwd=WEBSITE,
             check=True,
-            capture_output=True,
-            text=True,
         )
 
     def test_homepage_has_current_brand_and_primary_actions(self):
