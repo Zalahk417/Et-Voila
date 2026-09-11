@@ -156,14 +156,6 @@ def _replace_quote_links(html: str) -> str:
     return pattern.sub(repl, html)
 
 
-def _insert_after_first(html: str, marker: str, insertion: str) -> str:
-    index = html.lower().find(marker.lower())
-    if index == -1:
-        return html
-    index += len(marker)
-    return html[:index] + insertion + html[index:]
-
-
 def _site_enhancement_css() -> str:
     return """
 <style id="voila-sep11-enhancements">
@@ -340,13 +332,13 @@ def apply_latest_site_requirements() -> None:
         if "voila-sep11-enhancements" not in html:
             html = html.replace("</head>", _site_enhancement_css() + "</head>", 1)
 
-        if "voila-contact-strip" not in html:
+        if '<div class="voila-contact-strip"' not in html:
             body_match = re.search(r"<body[^>]*>", html, flags=re.IGNORECASE)
             if body_match:
                 insert_at = body_match.end()
                 html = html[:insert_at] + contact_strip + html[insert_at:]
 
-        if html_path == DIST / "index.html" and "voila-hero-banner" not in html:
+        if html_path == DIST / "index.html" and '<section class="voila-hero-banner"' not in html:
             header_end = re.search(r"</header>", html, flags=re.IGNORECASE)
             if header_end:
                 insert_at = header_end.end()
@@ -366,7 +358,7 @@ def apply_latest_site_requirements() -> None:
                 flags=re.IGNORECASE,
             )
 
-        if "voila-sticky-quote" not in html:
+        if '<a class="voila-sticky-quote"' not in html:
             html = re.sub(
                 r"</body>",
                 sticky_quote + "</body>",
@@ -381,11 +373,12 @@ def apply_latest_site_requirements() -> None:
     index_html = (DIST / "index.html").read_text(encoding="utf-8")
     checks = {
         "canonical brand": BRAND in index_html,
-        "tile hero": "voila-hero-banner" in index_html and HERO_IMAGE in index_html,
+        "contact strip": '<div class="voila-contact-strip"' in index_html,
+        "tile hero": '<section class="voila-hero-banner"' in index_html and HERO_IMAGE in index_html,
         "ServiceM8 booking": SERVICEM8_BOOKING_URL in index_html,
         "phone": PHONE_DISPLAY in index_html,
         "terms": "/terms/" in index_html,
-        "sticky quote": "voila-sticky-quote" in index_html,
+        "sticky quote": '<a class="voila-sticky-quote"' in index_html,
     }
     failed = [name for name, passed in checks.items() if not passed]
     if failed:
