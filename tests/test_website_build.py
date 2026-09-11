@@ -22,11 +22,12 @@ class WebsiteBuildAcceptanceTest(unittest.TestCase):
     def test_homepage_has_current_brand_and_primary_actions(self):
         html = (DIST / "index.html").read_text(encoding="utf-8")
         self.assertIn("Voilà Floor Care", html)
-        self.assertIn("voila-hero-banner", html)
+        self.assertIn('<div class="voila-contact-strip">', html)
+        self.assertIn('<section class="voila-hero-banner"', html)
         self.assertIn("tile-grout-restoration-03.webp", html)
         self.assertIn(SERVICEM8_URL, html)
         self.assertIn("0402 221 071", html)
-        self.assertIn("voila-sticky-quote", html)
+        self.assertIn('<a class="voila-sticky-quote"', html)
         self.assertIn('/terms/', html)
 
     def test_terms_page_exists_and_preserves_consumer_rights(self):
