@@ -141,7 +141,7 @@ def simplify_customer_copy() -> None:
 def _replace_quote_links(html: str) -> str:
     pattern = re.compile(
         r'<a(?P<before>[^>]*?)href=["\']/contact/?["\'](?P<after>[^>]*)>'
-        r'(?P<label>[^<]*(?:quote|Quote)[^<]*)</a>'
+        r'(?P<label>[^<]*(?:quote|Quote|enquiry|Enquiry)[^<]*)</a>'
     )
 
     def repl(match: re.Match[str]) -> str:
@@ -328,6 +328,25 @@ def apply_latest_site_requirements() -> None:
             html = html.replace(variant, BRAND)
 
         html = _replace_quote_links(html)
+
+        if html_path == DIST / "contact" / "index.html":
+            enquiry_button = (
+                '<div class="form"><p>Send your details and photos using our enquiry form.</p>'
+                f'<a class="voila-servicem8-button" href="{SERVICEM8_BOOKING_URL}" '
+                'aria-label="Request a quote through ServiceM8">'
+                f'<img src="{SERVICEM8_BUTTON_IMAGE}" width="250" '
+                'alt="Request a Quote"></a></div>'
+            )
+            html, form_count = re.subn(
+                r'<form\b[^>]*data-enquiry-form[^>]*>.*?</form>',
+                lambda match: enquiry_button, html, flags=re.DOTALL,
+            )
+            if form_count != 1:
+                raise RuntimeError("Expected exactly one legacy contact enquiry form")
+            html = html.replace(
+                "Photo upload is coming soon. For now, submit the enquiry or call or text us, and we can arrange a safe way to share photos.",
+                "You can attach photos in the enquiry form to help us assess your floor.",
+            )
 
         if "voila-sep11-enhancements" not in html:
             html = html.replace("</head>", _site_enhancement_css() + "</head>", 1)
