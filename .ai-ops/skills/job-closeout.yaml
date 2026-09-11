@@ -1,0 +1,43 @@
+schema_version: '1.0'
+id: voila.job-closeout
+name: Voilà — Job Closeout
+version: 1.0.0
+purpose: Close completed jobs with complete evidence, payment handoff and customer aftercare.
+sources_of_truth:
+  - ServiceM8 live job record
+  - approved service checklist
+  - Voilà Customer Handover standard
+procedure:
+  - verify work scope and approved variations
+  - capture required before and after photographs
+  - record pre-existing damage, limitations and completion notes
+  - complete required forms and QA checklist
+  - issue final invoice or confirm payment state
+  - issue receipt when payment is confirmed
+  - trigger customer handover workflow
+  - trigger review workflow only after completion state is valid
+  - record execution evidence
+completion_rule: A job is not operationally complete until required evidence and financial status are present.
+authority:
+  routine_closeout: AUTO-WITH-LIMITS
+  disputed_work_or_refund: OWNER APPROVAL
+  bypass_required_evidence: PROHIBITED
+quality_gates:
+  - correct job and customer
+  - required photos and forms present
+  - variations documented
+  - invoice/payment state correct
+  - no misleading before and after pairing
+outputs:
+  - closed_job
+  - handover_trigger
+  - review_trigger
+  - execution_record
+escalation:
+  - complaint_or_dispute
+  - missing_evidence
+  - payment_mismatch
+  - privacy_concern
+audit:
+  owner: Inspector General
+  frequency: sampled_weekly

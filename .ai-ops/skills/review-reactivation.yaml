@@ -1,0 +1,41 @@
+schema_version: '1.0'
+id: voila.review-reactivation
+name: Voilà — Review & Reactivation
+version: 1.0.0
+purpose: Request reviews without spamming customers and create service-appropriate reactivation opportunities.
+sources_of_truth:
+  - ServiceM8 completed job and customer record
+  - approved messaging rules
+  - service-specific maintenance interval
+procedure:
+  - wait until valid completed-job state exists
+  - keep receipt communication transactional
+  - send a separate satisfaction/review request at the approved timing
+  - include one-click Google review CTA when appropriate
+  - send at most one review reminder when no action is recorded
+  - record request and measurable response signals where available
+  - schedule reactivation using the genuinely approved service interval rather than a blanket cadence
+  - suppress messages for complaints, disputes, opt-outs or inappropriate contexts
+authority:
+  approved_review_sequence: AUTONOMOUS
+  approved_reactivation_sequence: AUTONOMOUS
+  change_message_policy_or_frequency: OWNER APPROVAL
+  message_opted_out_or_disputed_customer: PROHIBITED
+quality_gates:
+  - completed-job state verified
+  - no complaint or dispute suppression flag
+  - consent and communication rules respected
+  - no more than one review reminder
+  - reactivation interval matches service rule
+outputs:
+  - review_request_record
+  - reactivation_task_or_message
+  - performance_metrics
+escalation:
+  - complaint
+  - opt_out
+  - uncertain_consent
+  - uncertain_service_interval
+audit:
+  owner: Inspector General
+  frequency: monthly
