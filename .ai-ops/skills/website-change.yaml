@@ -1,0 +1,65 @@
+schema_version: '1.0'
+id: voila.website-change
+name: Voilà — Website Change
+version: 1.0.0
+purpose: Apply customer-facing website changes consistently, test them, and prevent unverified deployment claims.
+trigger:
+  - website_change_request
+  - approved_feedback
+  - brand_update
+inputs:
+  - current_request
+  - current_brand_standard
+  - repository_state
+  - deployment_contract
+sources_of_truth:
+  - Voilà Floor Care — Command & Source of Truth
+  - GitHub Zalahk417/Et-Voila
+  - approved ServiceM8 booking endpoint
+procedure:
+  - inspect current source before changing it
+  - identify superseded copy and current acceptance criteria
+  - reuse the existing website architecture and durable repository assets
+  - make changes on a branch when the change is material
+  - keep credentials and private operating data out of frontend code
+  - run build and regression tests
+  - verify brand spelling, phone access, quote CTA, legal links, mobile behaviour and image integrity
+  - open and review a pull request
+  - merge only when required tests pass
+  - verify the production target after deployment before reporting DONE
+  - record implementation evidence and remaining blockers
+status_language:
+  built_not_deployed: source committed but production not verified
+  tested: automated/local checks passed
+  done: production target and key customer journey verified
+authority:
+  reversible_copy_and_layout: AUTONOMOUS
+  code_change_inside_existing_architecture: AUTONOMOUS
+  production_merge_after_passing_tests: AUTO-WITH-LIMITS
+  new_paid_service_or_material_architecture_change: OWNER APPROVAL
+  publish_unverified_claims_or_secrets: PROHIBITED
+quality_gates:
+  - canonical brand is Voilà Floor Care
+  - primary quote path uses the approved ServiceM8 endpoint
+  - telephone access is prominent
+  - no Jim's branding or protected franchise IP
+  - Terms & Conditions and privacy information remain accessible
+  - no secrets are exposed client-side
+  - build succeeds
+  - regression tests pass
+  - mobile acceptance criteria are checked
+  - production verification exists before DONE
+outputs:
+  - source_change
+  - test_evidence
+  - deployment_status
+  - execution_record
+escalation:
+  - legal_or_consumer_claim_change
+  - unavailable_production_target
+  - credentials_or_security_change
+  - material_new_subscription
+  - destructive_repository_change
+audit:
+  owner: Inspector General
+  frequency: on_material_change
