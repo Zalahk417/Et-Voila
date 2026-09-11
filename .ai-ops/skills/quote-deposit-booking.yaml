@@ -1,0 +1,37 @@
+schema_version: '1.0'
+id: voila.quote-deposit-booking
+name: Voilà — Quote, Deposit & Booking
+version: 1.0.0
+purpose: Convert an inspected/scoped opportunity into a confirmed job without stale-slot or double-booking errors.
+sources_of_truth:
+  - ServiceM8 live job and diary
+  - approved quote and pricing rules
+  - Voilà Floor Care — Command & Source of Truth
+procedure:
+  - confirm scope and approved price
+  - issue quote by approved channels
+  - require 50 percent deposit where configured
+  - detect accepted quote and successful deposit
+  - confirm the agreed slot is still valid before changing booking to confirmed
+  - send booking confirmation only after valid scheduling state exists
+  - record acceptance, payment and scheduling evidence
+authority:
+  standard_approved_quote: AUTO-WITH-LIMITS
+  pricing_exception: OWNER APPROVAL
+  confirm_unavailable_or_unverified_slot: PROHIBITED
+quality_gates:
+  - approved scope and price
+  - deposit state verified
+  - live diary availability verified
+  - confirmation message matches final slot
+outputs:
+  - confirmed_job_or_scheduling_task
+  - evidence_record
+escalation:
+  - price_exception
+  - stale_slot
+  - payment_mismatch
+  - customer_requested_variation
+audit:
+  owner: Inspector General
+  frequency: sampled_weekly
