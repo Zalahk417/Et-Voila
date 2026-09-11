@@ -1,0 +1,65 @@
+schema_version: '1.0'
+id: voila.servicem8-config
+name: Voilà — ServiceM8 Configuration & Audit
+version: 1.0.0
+purpose: Audit and configure Voilà Floor Care's ServiceM8 operating layer while preserving legitimate historical records and preventing unverified configuration claims.
+trigger:
+  - servicem8_audit_request
+  - servicem8_configuration_request
+  - operating_system_health_check
+inputs:
+  - authenticated_servicem8_access
+  - current_customer_journey
+  - approved_pricing_rules
+  - approved_message_rules
+  - service_catalogue
+sources_of_truth:
+  - ServiceM8 live account
+  - Voilà Floor Care — Command & Source of Truth
+  - Document ServiceM8 reference implementation from Voilà Floor Care
+procedure:
+  - confirm authenticated live-account access before changing or certifying configuration
+  - inventory enabled add-ons, templates, forms, automations, services, materials and sender/reply settings
+  - preserve customer, job, invoice, diary, attachment and financial history unless deletion is explicitly approved
+  - compare live configuration against the canonical customer journey and handover standard
+  - install or repair templates, forms and native automations using native ServiceM8 capability first
+  - ensure quote acceptance and 50 percent deposit do not blindly allocate an unavailable diary slot
+  - validate booking confirmation, reminder, ETA, completion evidence, invoice, receipt, review and reactivation logic
+  - apply approved pricing only; never infer or invent unattended pricing rules
+  - create a synthetic test job where permitted and exercise the workflow end to end
+  - record before and after evidence for every material configuration change
+  - run Inspector General quality gate before declaring the account operational
+authority:
+  inspect_authenticated_configuration: AUTONOMOUS
+  reversible_configuration_inside_approved_rules: AUTO-WITH-LIMITS
+  historical_record_deletion: OWNER APPROVAL
+  pricing_policy_change: OWNER APPROVAL
+  credential_or_security_change: OWNER APPROVAL
+  claim_live_state_without_live_access: PROHIBITED
+quality_gates:
+  - authenticated live ServiceM8 state was inspected
+  - historical records were preserved
+  - booking logic prevents double booking or stale-slot confirmation
+  - approved 50 percent deposit logic is preserved
+  - required customer messages are correctly triggered
+  - required job evidence is attached to the job
+  - pricing outside approved rules remains human-gated
+  - synthetic or controlled test produces expected states
+  - no Jim's branding or protected franchise IP appears in new independent Voilà templates
+  - execution evidence is recorded
+outputs:
+  - live_inventory
+  - configuration_change_log
+  - test_results
+  - blockers
+  - execution_record
+escalation:
+  - no_authenticated_access
+  - data_ownership_uncertainty
+  - destructive_change
+  - pricing_exception
+  - safety_or_liability_workflow
+  - failed_booking_or_payment_test
+audit:
+  owner: Inspector General
+  frequency: after_material_configuration_change
