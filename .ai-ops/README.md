@@ -13,3 +13,5 @@ Governance authority remains in the cross-system AI Operations Command. Domain f
 
 ## Current skills
 - `skills/customer-handover.yaml` — customer handover booklet and marketing-photo extraction.
+- `skills/website-change.yaml` — inspect, implement, test, merge and verify material website changes.
+- `skills/servicem8-config.yaml` — authenticated ServiceM8 audit/configuration with booking, pricing and evidence controls.
