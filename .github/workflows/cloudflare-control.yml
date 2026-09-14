@@ -1,0 +1,107 @@
+name: Cloudflare control plane
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cloudflare-control-plane
+    paths:
+      - .github/workflows/cloudflare-control.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify-cloudflare:
+    runs-on: ubuntu-latest
+    env:
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CF_PROJECT: voila-floor
+    steps:
+      - name: Validate secret presence
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CF_API_TOKEN" || { echo "CLOUDFLARE_API_TOKEN is missing"; exit 1; }
+          test -n "$CF_ACCOUNT_ID" || { echo "CLOUDFLARE_ACCOUNT_ID is missing"; exit 1; }
+
+      - name: Verify token and inspect safe Pages metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            https://api.cloudflare.com/client/v4/user/tokens/verify \
+            > /tmp/token.json
+
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT" \
+            > /tmp/project.json
+
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT/deployments" \
+            > /tmp/deployments.json
+
+          python - <<'PY'
+          import json
+
+          with open('/tmp/token.json') as f:
+              token = json.load(f)
+          with open('/tmp/project.json') as f:
+              project = json.load(f)
+          with open('/tmp/deployments.json') as f:
+              deployments = json.load(f)
+
+          if not token.get('success'):
+              raise SystemExit('Cloudflare token verification failed')
+          if not project.get('success'):
+              raise SystemExit('Cloudflare Pages project lookup failed')
+          if not deployments.get('success'):
+              raise SystemExit('Cloudflare deployment lookup failed')
+
+          result = project.get('result') or {}
+          source = result.get('source') or {}
+          source_config = source.get('config') or {}
+          latest = result.get('latest_deployment') or {}
+          trigger = latest.get('deployment_trigger') or {}
+          metadata = trigger.get('metadata') or {}
+
+          safe = {
+              'token_status': (token.get('result') or {}).get('status'),
+              'project_name': result.get('name'),
+              'subdomain': result.get('subdomain'),
+              'production_branch': result.get('production_branch'),
+              'source_type': source.get('type'),
+              'source_repo': source_config.get('repo_name'),
+              'source_owner': source_config.get('owner'),
+              'latest_deployment': {
+                  'id': latest.get('id'),
+                  'url': latest.get('url'),
+                  'environment': latest.get('environment'),
+                  'branch': metadata.get('branch'),
+                  'commit_hash': metadata.get('commit_hash'),
+              },
+              'recent_deployments': [],
+          }
+
+          for dep in (deployments.get('result') or [])[:5]:
+              dep_trigger = dep.get('deployment_trigger') or {}
+              dep_meta = dep_trigger.get('metadata') or {}
+              safe['recent_deployments'].append({
+                  'id': dep.get('id'),
+                  'url': dep.get('url'),
+                  'environment': dep.get('environment'),
+                  'branch': dep_meta.get('branch'),
+                  'commit_hash': dep_meta.get('commit_hash'),
+                  'created_on': dep.get('created_on'),
+              })
+
+          print(json.dumps(safe, indent=2))
+          PY
