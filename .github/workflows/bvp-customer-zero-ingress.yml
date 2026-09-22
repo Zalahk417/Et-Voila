@@ -1,0 +1,130 @@
+name: BVP Customer Zero Ingress Probe
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/bvp-customer-zero-ingress.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-ingress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Capture live deployment identity
+        shell: bash
+        run: |
+          set -u
+          curl -sS "https://voila-floor.pages.dev/bvp-deployment.json?probe=${GITHUB_RUN_ID}" \
+            -o deployment.json || printf '{"error":"deployment identity fetch failed"}\n' > deployment.json
+          cat deployment.json
+
+      - name: Submit one synthetic Customer Zero enquiry
+        id: probe
+        shell: bash
+        run: |
+          cat > payload.json <<'JSON'
+          {
+            "customer_name": "BVP CUSTOMER ZERO — DO NOT SERVICE",
+            "phone": "0400 000 000",
+            "email": "bvp-customer-zero@example.invalid",
+            "job_address": "1 Test Street, Geraldton WA 6530",
+            "service": "carpet cleaning",
+            "customer_type": "domestic",
+            "measurements": "synthetic test",
+            "preferred_timing": "none - do not schedule",
+            "message": "[BVP-CZ] Synthetic integration test only. Do not contact, schedule, quote, invoice or service. Testing governed Cloudflare to n8n ingress.",
+            "privacy_consent": "yes"
+          }
+          JSON
+          http_code="$(curl -sS \
+            -X POST "https://voila-floor.pages.dev/api/enquiry" \
+            -H "content-type: application/json" \
+            --data-binary @payload.json \
+            -o response.json \
+            -w '%{http_code}')"
+          printf '%s' "$http_code" > http_code.txt
+          echo "HTTP $http_code"
+          cat response.json
+
+      - name: Build canonical evidence envelope
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timedelta, timezone
+
+          def read_json(path):
+              try:
+                  with open(path, encoding="utf-8") as f:
+                      return json.load(f)
+              except Exception as exc:
+                  return {"parse_error": str(exc)}
+
+          deployment = read_json("deployment.json")
+          response = read_json("response.json")
+          try:
+              http_code = int(open("http_code.txt", encoding="utf-8").read().strip())
+          except Exception:
+              http_code = 0
+
+          now = datetime.now(timezone.utc)
+          ok = http_code == 200 and response.get("ok") is True and bool(response.get("correlation_id"))
+          evidence = {
+              "schema_version": 1,
+              "project": "voila-floor-care",
+              "environment": "production",
+              "capability": "enquiry_to_servicem8_job",
+              "proof_type": "inbound_runtime",
+              "evidence_class": "runtime",
+              "observed_at": now.isoformat(),
+              "expires_at": (now + timedelta(hours=24)).isoformat(),
+              "outcome": "PASS" if ok else "FAIL",
+              "correlation_id": response.get("correlation_id") or f"github-run-{os.environ['GITHUB_RUN_ID']}",
+              "source": "voila-floor.pages.dev/api/enquiry",
+              "target": "n8n-lead-webhook",
+              "evidence_uri": os.environ.get("GITHUB_SERVER_URL", "https://github.com") + "/" + os.environ["GITHUB_REPOSITORY"] + "/actions/runs/" + os.environ["GITHUB_RUN_ID"],
+              "detail": {
+                  "http_code": http_code,
+                  "response": response,
+                  "deployment": deployment,
+                  "synthetic": True,
+                  "customer_contact_allowed": False,
+                  "scheduling_allowed": False,
+                  "invoicing_allowed": False,
+                  "payment_allowed": False
+              },
+              "producer": "github-actions:bvp-customer-zero-ingress"
+          }
+          with open("bvp-customer-zero-evidence.json", "w", encoding="utf-8") as f:
+              json.dump(evidence, f, indent=2, ensure_ascii=False)
+              f.write("\n")
+          print(json.dumps(evidence, indent=2, ensure_ascii=False))
+          PY
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bvp-customer-zero-ingress-evidence
+          path: bvp-customer-zero-evidence.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Assert governed ingress passed
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          evidence = json.load(open("bvp-customer-zero-evidence.json", encoding="utf-8"))
+          if evidence["outcome"] != "PASS":
+              raise SystemExit("Customer Zero ingress evidence is not PASS")
+          print("PASS correlation_id=" + evidence["correlation_id"])
+          PY
