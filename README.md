@@ -1,6 +1,8 @@
-# Et-Voila — Voila Floor AI Automation
+# Et-Voila — Voilà Floor Care automation
 
-Production-minded automation foundation for **Voila Floor Cleaning & Restoration** (Midwest Trade Hub Pty Ltd).
+Production-minded automation foundation for **Voilà Floor Care** (Midwest Trade Hub Pty Ltd).
+
+The repository keeps the stable technical name `Et-Voila`; customer-facing and operating documentation should use **Voilà Floor Care**.
 
 ## Current deployable slice
 
@@ -16,6 +18,7 @@ The repository defaults to **dry-run**. It will not create ServiceM8 jobs unless
 - No autonomous pricing commitments, guarantees, refunds, complaint resolutions or restoration-risk decisions.
 - Jim's/franchise-controlled historical data is excluded unless explicitly cleared for migration/use.
 - Credentials live only in environment/secrets stores, never in prompts or committed files.
+- Shared BVP platform health does **not** prove the Voilà ServiceM8 business-cell path. Production promotion requires fresh scoped write/reread/replay/reconciliation evidence.
 
 ## Quick start
 
