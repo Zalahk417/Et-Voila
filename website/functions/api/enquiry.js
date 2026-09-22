@@ -6,6 +6,24 @@ const json = (body, status = 200) => new Response(JSON.stringify(body), {
   },
 });
 
+const canonicalKeyPayload = (payload) => ({
+  source: "website",
+  customer_name: payload.customer_name.toLowerCase(),
+  email: payload.email.toLowerCase(),
+  phone: payload.phone.replace(/\D/g, ""),
+  job_address: payload.job_address.toLowerCase(),
+  service: payload.service.toLowerCase(),
+  message: payload.message.toLowerCase(),
+});
+
+async function makeIdempotencyKey(payload) {
+  const raw = new TextEncoder().encode(JSON.stringify(canonicalKeyPayload(payload)));
+  const digest = await crypto.subtle.digest("SHA-256", raw);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, 24);
+}
+
 export async function onRequestPost({ request, env }) {
   if (!env.N8N_LEAD_WEBHOOK_URL) {
     return json({ error: "Enquiry service is not configured" }, 503);
@@ -52,6 +70,11 @@ export async function onRequestPost({ request, env }) {
     return json({ error: "Missing required fields" }, 400);
   }
 
+  const correlationId = crypto.randomUUID();
+  const idempotencyKey = await makeIdempotencyKey(payload);
+  payload.correlation_id = correlationId;
+  payload.idempotency_key = idempotencyKey;
+
   let upstream;
   try {
     upstream = await fetch(env.N8N_LEAD_WEBHOOK_URL, {
@@ -59,6 +82,8 @@ export async function onRequestPost({ request, env }) {
       headers: {
         "content-type": "application/json",
         "x-voila-source": "website",
+        "x-bvp-correlation-id": correlationId,
+        "x-bvp-idempotency-key": idempotencyKey,
       },
       body: JSON.stringify(payload),
     });
@@ -70,7 +95,7 @@ export async function onRequestPost({ request, env }) {
     return json({ error: "Enquiry workflow unavailable" }, 502);
   }
 
-  return json({ ok: true });
+  return json({ ok: true, correlation_id: correlationId });
 }
 
 export function onRequest() {
