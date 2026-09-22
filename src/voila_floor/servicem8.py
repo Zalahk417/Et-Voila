@@ -43,6 +43,58 @@ class ServiceM8Client:
         if not isinstance(data, dict): raise ServiceM8Error("Unexpected company response")
         return data
 
+
+    def get_job(self, uuid: str) -> dict[str, Any]:
+        data, _ = self._request("GET", f"job/{urllib.parse.quote(uuid)}.json")
+        if not isinstance(data, dict):
+            raise ServiceM8Error("Unexpected job response")
+        return data
+
+    def search_jobs(self, query: str, limit: int = 50) -> list[dict[str, Any]]:
+        query = query.strip()
+        if not query:
+            raise ServiceM8Error("Search query is required")
+        if len(query) > 100:
+            raise ServiceM8Error("Search query must be 100 characters or fewer")
+        if not 1 <= limit <= 100:
+            raise ServiceM8Error("Search limit must be between 1 and 100")
+        params = urllib.parse.urlencode({"q": query, "limit": limit})
+        data, _ = self._request("GET", f"search/job.json?{params}")
+        if isinstance(data, list):
+            return [item for item in data if isinstance(item, dict)]
+        if isinstance(data, dict):
+            for key in ("results", "data"):
+                value = data.get(key)
+                if isinstance(value, list):
+                    return [item for item in value if isinstance(item, dict)]
+        raise ServiceM8Error("Unexpected job search response")
+
+    def create_job_from_template(
+        self,
+        template_uuid: str,
+        *,
+        company_name: str,
+        job_address: str,
+        job_description: str,
+    ) -> str:
+        self._assert_write_enabled()
+        payload = {
+            "company_name": company_name,
+            "job_address": job_address,
+            "job_description": job_description,
+        }
+        _, headers = self._request(
+            "POST",
+            f"jobtemplate/{urllib.parse.quote(template_uuid)}/job.json",
+            payload,
+        )
+        uuid = headers.get("x-record-uuid", "")
+        if not uuid:
+            raise ServiceM8Error(
+                "ServiceM8 did not return x-record-uuid for template job creation"
+            )
+        return uuid
+
     def create_company(self, name: str, address: str = "") -> str:
         self._assert_write_enabled()
         _, headers = self._request("POST", "company.json", {"name": name, "address": address})
