@@ -1,6 +1,8 @@
 from pathlib import Path
 import base64
 import io
+import json
+import os
 import re
 import shutil
 import zipfile
@@ -381,6 +383,20 @@ def apply_latest_site_requirements() -> None:
         raise RuntimeError(f"Website acceptance checks failed: {', '.join(failed)}")
 
 
+
+def write_bvp_deployment_identity() -> None:
+    identity = {
+        "schema_version": 1,
+        "provider": "cloudflare-pages" if os.getenv("CF_PAGES") == "1" else "local-ci",
+        "source_commit": os.getenv("CF_PAGES_COMMIT_SHA") or os.getenv("GITHUB_SHA") or "local",
+        "source_branch": os.getenv("CF_PAGES_BRANCH") or os.getenv("GITHUB_REF_NAME") or "local",
+        "deployment_url": os.getenv("CF_PAGES_URL") or "",
+    }
+    (DIST / "bvp-deployment.json").write_text(
+        json.dumps(identity, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
 def main() -> None:
     if DIST.exists():
         shutil.rmtree(DIST)
@@ -403,6 +419,7 @@ def main() -> None:
     add_public_phone_details()
     simplify_customer_copy()
     apply_latest_site_requirements()
+    write_bvp_deployment_identity()
 
     files = sum(1 for path in DIST.rglob("*") if path.is_file())
     print(f"Voilà Floor Care website built: {files} static files -> {DIST}")
