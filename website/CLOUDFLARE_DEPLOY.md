@@ -19,11 +19,12 @@ Until this secret exists, the website may be previewed but enquiry forwarding mu
 1. Create/import the Cloudflare Pages project from the GitHub repository.
 2. Apply the project settings above.
 3. Deploy to the generated `*.pages.dev` preview/production hostname first.
-4. Smoke-test `/`, service pages, `/blog/`, `/case-studies/`, `/contact/`, `/sitemap.xml`, `/robots.txt` and `/api/enquiry`.
+4. Smoke-test `/`, service pages, `/blog/`, `/case-studies/`, `/contact/`, `/sitemap.xml`, `/robots.txt`, `/api/enquiry` and `/bvp-deployment.json`.
 5. Add `N8N_LEAD_WEBHOOK_URL` only after the n8n production webhook has been reviewed.
-6. Test one synthetic enquiry end-to-end before accepting customer traffic.
-7. Add the final custom domain only after the canonical production domain is confirmed.
-8. Verify Search Console, sitemap submission, Google Business Profile website URL and conversion analytics after launch.
+6. Verify `/bvp-deployment.json` reports the exact current GitHub `main` commit SHA; a mismatch is RED and must not be promoted.
+7. Test one synthetic enquiry end-to-end before accepting customer traffic.
+8. Add the final custom domain only after the canonical production domain is confirmed.
+9. Verify Search Console, sitemap submission, Google Business Profile website URL and conversion analytics after launch.
 
 ## Safety
 - Never expose ServiceM8, n8n or model API credentials in frontend code.
