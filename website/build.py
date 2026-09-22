@@ -98,6 +98,14 @@ def add_public_phone_details() -> None:
         fallback_message,
         f"We could not send that enquiry. Please call or text {PHONE_DISPLAY}.",
     )
+
+    success_message = "Thanks — your enquiry has been received. We’ll review the details and get back to you."
+    if javascript.count(success_message) != 1:
+        raise RuntimeError("Enquiry success message was not found exactly once")
+    javascript = javascript.replace(
+        "status.textContent='" + success_message + "';form.reset()",
+        "status.textContent='" + success_message + "'+(out.correlation_id?' Reference: '+out.correlation_id:'');form.reset()",
+    )
     site_js.write_text(javascript, encoding="utf-8")
 
 

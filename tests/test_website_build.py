@@ -38,6 +38,8 @@ class WebsiteBuildAcceptanceTest(unittest.TestCase):
         self.assertIn("data-enquiry-form", contact)
         self.assertNotIn(SERVICEM8_URL, contact)
         self.assertIn("/api/enquiry", javascript)
+        self.assertIn("out.correlation_id", javascript)
+        self.assertIn("Reference:", javascript)
 
     def test_bvp_deployment_identity_is_emitted(self):
         deployment = json.loads((DIST / "bvp-deployment.json").read_text(encoding="utf-8"))
