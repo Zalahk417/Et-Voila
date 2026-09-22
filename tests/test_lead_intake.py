@@ -24,6 +24,54 @@ class LeadIntakeTests(unittest.TestCase):
         c=ServiceM8Client(api_key="fake",allow_writes=False)
         with self.assertRaises(ServiceM8Error): c.create_job("00000000-0000-0000-0000-000000000000",{"status":"Quote"})
 
+    def test_servicem8_job_reread(self):
+        class Fake(ServiceM8Client):
+            def _request(self, method, path, payload=None):
+                self.last = (method, path, payload)
+                return {"uuid": "job-123", "job_description": "BVP correlation ID: cz-1"}, {}
+        client = Fake(api_key="fake", allow_writes=False)
+        job = client.get_job("job-123")
+        self.assertEqual(job["uuid"], "job-123")
+        self.assertEqual(client.last[0], "GET")
+        self.assertEqual(client.last[1], "job/job-123.json")
+
+    def test_servicem8_search_jobs_encodes_marker(self):
+        class Fake(ServiceM8Client):
+            def _request(self, method, path, payload=None):
+                self.last = (method, path, payload)
+                return [{"uuid": "job-123"}], {}
+        client = Fake(api_key="fake", allow_writes=False)
+        jobs = client.search_jobs("BVP idempotency key: abc 123", limit=10)
+        self.assertEqual(jobs[0]["uuid"], "job-123")
+        self.assertIn("search/job.json?", client.last[1])
+        self.assertIn("limit=10", client.last[1])
+        self.assertIn("BVP+idempotency+key%3A+abc+123", client.last[1])
+
+    def test_template_job_write_is_guarded_and_returns_uuid(self):
+        class Fake(ServiceM8Client):
+            def _request(self, method, path, payload=None):
+                self.last = (method, path, payload)
+                return None, {"x-record-uuid": "job-456"}
+        blocked = Fake(api_key="fake", allow_writes=False)
+        with self.assertRaises(ServiceM8Error):
+            blocked.create_job_from_template(
+                "template-1",
+                company_name="BVP CUSTOMER ZERO — DO NOT SERVICE",
+                job_address="1 Test Street",
+                job_description="BVP correlation ID: cz-1",
+            )
+        enabled = Fake(api_key="fake", allow_writes=True)
+        job_uuid = enabled.create_job_from_template(
+            "template-1",
+            company_name="BVP CUSTOMER ZERO — DO NOT SERVICE",
+            job_address="1 Test Street",
+            job_description="BVP correlation ID: cz-1",
+        )
+        self.assertEqual(job_uuid, "job-456")
+        self.assertEqual(enabled.last[0], "POST")
+        self.assertEqual(enabled.last[1], "jobtemplate/template-1/job.json")
+        self.assertEqual(enabled.last[2]["company_name"], "BVP CUSTOMER ZERO — DO NOT SERVICE")
+
 class OpenAIResponseParsingTests(unittest.TestCase):
     def test_extract_output_text(self):
         from voila_floor.openai_extract import extract_output_text
