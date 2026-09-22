@@ -25,10 +25,18 @@ class WebsiteBuildAcceptanceTest(unittest.TestCase):
         self.assertIn('<div class="voila-contact-strip">', html)
         self.assertIn('<section class="voila-hero-banner"', html)
         self.assertIn("tile-grout-restoration-03.webp", html)
-        self.assertIn(SERVICEM8_URL, html)
+        self.assertNotIn(SERVICEM8_URL, html)
         self.assertIn("0402 221 071", html)
-        self.assertIn('<a class="voila-sticky-quote"', html)
+        self.assertIn('<a class="voila-sticky-quote" href="/contact/"', html)
+        self.assertIn('<a class="voila-primary-cta" href="/contact/">Start an Enquiry</a>', html)
         self.assertIn('/terms/', html)
+
+    def test_contact_form_uses_bvp_enquiry_endpoint(self):
+        contact = (DIST / "contact" / "index.html").read_text(encoding="utf-8")
+        javascript = (DIST / "assets" / "site.js").read_text(encoding="utf-8")
+        self.assertIn("data-enquiry-form", contact)
+        self.assertNotIn(SERVICEM8_URL, contact)
+        self.assertIn("/api/enquiry", javascript)
 
     def test_terms_page_exists_and_preserves_consumer_rights(self):
         terms = (DIST / "terms" / "index.html").read_text(encoding="utf-8")

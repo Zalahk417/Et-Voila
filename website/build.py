@@ -32,10 +32,7 @@ SERVICEM8_BOOKING_URL = (
     "https://book.servicem8.com/request_booking"
     "?uuid=725f7ba5-b2b6-4997-926c-1f3f26af55eb"
 )
-SERVICEM8_BUTTON_IMAGE = (
-    "https://www.servicem8.com/images/plugin_online_booking/"
-    "Quote-Request-Button.png"
-)
+ENQUIRY_URL = "/contact/"
 HERO_IMAGE = "/assets/case-studies/tile-grout-restoration-03.webp"
 
 
@@ -148,10 +145,7 @@ def _replace_quote_links(html: str) -> str:
         before = match.group("before")
         after = match.group("after")
         label = match.group("label").strip() or "Request a Quote"
-        return (
-            f'<a{before}href="{SERVICEM8_BOOKING_URL}"{after} '
-            f'target="_blank" rel="noopener">{label}</a>'
-        )
+        return f'<a{before}href="{ENQUIRY_URL}"{after}>{label}</a>'
 
     return pattern.sub(repl, html)
 
@@ -295,8 +289,8 @@ def apply_latest_site_requirements() -> None:
         "</div>"
     )
     sticky_quote = (
-        f'<a class="voila-sticky-quote" href="{SERVICEM8_BOOKING_URL}" '
-        'target="_blank" rel="noopener" aria-label="Request a quote through ServiceM8">'
+        f'<a class="voila-sticky-quote" href="{ENQUIRY_URL}" '
+        'aria-label="Start a Voilà Floor Care enquiry">'
         "Request a Quote</a>"
     )
     terms_link = '<a class="voila-terms-link" href="/terms/">Terms &amp; Conditions</a>'
@@ -310,14 +304,10 @@ def apply_latest_site_requirements() -> None:
         '<p>Deep cleaning and restoration for tired tile and grout, backed by complete floor care '
         'for carpet, upholstery, stone, vinyl, concrete and commercial properties.</p>'
         '<div class="voila-hero-actions">'
-        f'<a class="voila-primary-cta" href="{SERVICEM8_BOOKING_URL}" target="_blank" rel="noopener">'
-        'Request a Quote</a>'
+        f'<a class="voila-primary-cta" href="{ENQUIRY_URL}">'
+        'Start an Enquiry</a>'
         f'<a class="voila-secondary-cta" href="tel:{PHONE_E164}">Call {PHONE_DISPLAY}</a>'
         '</div>'
-        f'<div class="voila-servicem8-button"><a style="border:none;" href="{SERVICEM8_BOOKING_URL}" '
-        'target="_blank" rel="noopener">'
-        f'<img src="{SERVICEM8_BUTTON_IMAGE}" width="250" '
-        'alt="Request a quote through ServiceM8"></a></div>'
         '</div></section>'
     )
 
@@ -330,23 +320,9 @@ def apply_latest_site_requirements() -> None:
         html = _replace_quote_links(html)
 
         if html_path == DIST / "contact" / "index.html":
-            enquiry_button = (
-                '<div class="form"><p>Send your details and photos using our enquiry form.</p>'
-                f'<a class="voila-servicem8-button" href="{SERVICEM8_BOOKING_URL}" '
-                'aria-label="Request a quote through ServiceM8">'
-                f'<img src="{SERVICEM8_BUTTON_IMAGE}" width="250" '
-                'alt="Request a Quote"></a></div>'
-            )
-            html, form_count = re.subn(
-                r'<form\b[^>]*data-enquiry-form[^>]*>.*?</form>',
-                lambda match: enquiry_button, html, flags=re.DOTALL,
-            )
+            form_count = len(re.findall(r'<form\b[^>]*data-enquiry-form[^>]*>', html))
             if form_count != 1:
-                raise RuntimeError("Expected exactly one legacy contact enquiry form")
-            html = html.replace(
-                "Photo upload is coming soon. For now, submit the enquiry or call or text us, and we can arrange a safe way to share photos.",
-                "You can attach photos in the enquiry form to help us assess your floor.",
-            )
+                raise RuntimeError("Expected exactly one BVP contact enquiry form")
 
         if "voila-sep11-enhancements" not in html:
             html = html.replace("</head>", _site_enhancement_css() + "</head>", 1)
@@ -394,7 +370,8 @@ def apply_latest_site_requirements() -> None:
         "canonical brand": BRAND in index_html,
         "contact strip": '<div class="voila-contact-strip"' in index_html,
         "tile hero": '<section class="voila-hero-banner"' in index_html and HERO_IMAGE in index_html,
-        "ServiceM8 booking": SERVICEM8_BOOKING_URL in index_html,
+        "BVP enquiry path": f'href="{ENQUIRY_URL}"' in index_html,
+        "no primary ServiceM8 bypass": SERVICEM8_BOOKING_URL not in index_html,
         "phone": PHONE_DISPLAY in index_html,
         "terms": "/terms/" in index_html,
         "sticky quote": '<a class="voila-sticky-quote"' in index_html,
