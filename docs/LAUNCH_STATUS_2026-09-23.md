@@ -9,7 +9,7 @@ Architecture and staging are substantially complete, but V1 is not launch-green.
 - GitHub live ServiceM8 state is recorded in `config/servicem8.production.json` schema v2 and production writes remain disabled by default.
 - Cloudflare Pages origin `https://voila-floor.pages.dev/` is healthy.
 - Final deployment recheck reports source branch `main` and source commit `1f3503630d40a67a7c3edbab41eb2fcf8da9f4cb`, confirming GitHub → Cloudflare Pages auto-deployment is current.
-- The current site serves the Voilà Floor Care brand, Australian-English customer copy, service catalogue, call/text route, Privacy and Terms pages.
+- The current site serves the Voilà Floor Care brand, Australian-English customer copy, service catalogue and call/text route. Privacy and Terms pages were live-checked with no obvious launch placeholder; Terms identifies Midwest Trade Hub Pty Ltd as operator.
 - Canva has a native Voilà Floor Care Brand Kit and a 10-page Master Brand Guidelines design. Its palette matches the website source.
 - Notion remains the governance/staging authority and now contains the 23 September full-project consolidation audit. Four verified-empty duplicate staging databases were renamed `DEPRECATED — EMPTY`; canonical populated masters contain 35 registry, 70 catalogue, 3 supplier and 46 knowledge-control records.
 - n8n cloud host and readiness endpoints both return `status: ok`; host availability is GREEN, while workflow/credential wiring remains unproven.
@@ -20,7 +20,7 @@ Architecture and staging are substantially complete, but V1 is not launch-green.
 3. ServiceM8 live tenant is not populated with the approved Voilà job templates, forms, floor-care queues/taxonomy and launch configuration.
 4. ServiceM8 tax is not launch-ready: NONE/0% is currently the default.
 5. Knowledge Management is inactive; Premium/feature-trial configuration still needs runtime setup and verification.
-6. Google Workspace admin runtime is not connected here. Gmail/Drive connector currently resolves to the personal `pmhaik@gmail.com` identity. Test messages were sent to `hello@`, `bookings@` and `accounts@voilafloor.com.au`, but no inbound alias delivery or outbound send-as evidence is visible, so Voilà role-mail routing/reply identity is not certified.
+6. Google Workspace admin runtime is not connected here. Gmail/Drive connector currently resolves to the personal `pmhaik@gmail.com` identity. Voilà tests to `hello@`, `bookings@` and `accounts@voilafloor.com.au` show no delivery-failure notices, but target-inbox delivery and outbound send-as are not visible from this connector. Parent-domain `accounts@midwesttradehub.com.au` and `systems@midwesttradehub.com.au` tests returned 550 5.1.1 address-not-found and require repair.
 7. Opera Browser Connector is not connected and the Remote Desktop device is offline, preventing authenticated UI repair of Cloudflare, n8n, Google Admin and ServiceM8 configuration from this session.
 
 ## Release rule
