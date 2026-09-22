@@ -14,7 +14,7 @@
     "categories": [
       {"name":"Standard","uuid":"01a0c8ff-df54-7f59-93f1-22a75952869b"},
       {"name":"VIP","uuid":"01a0c8ff-e233-7f59-93f0-67db1c47bcfb"},
-      {"name":"Warranty","uuid":"01a0c8ff-e50c-7f59-93f1-059d9a4cb4db"},
+      {"name":"Warranty","uuid":"01a0c8ff-e50c-7f59-93f0-b10766119b8b"},
       {"name":"After-Hours","uuid":"01a0c8ff-e7e6-7f59-93f1-059d9a4cb4db"}
     ],
     "badges": [
