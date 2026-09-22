@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 import unittest
@@ -37,6 +38,13 @@ class WebsiteBuildAcceptanceTest(unittest.TestCase):
         self.assertIn("data-enquiry-form", contact)
         self.assertNotIn(SERVICEM8_URL, contact)
         self.assertIn("/api/enquiry", javascript)
+
+    def test_bvp_deployment_identity_is_emitted(self):
+        deployment = json.loads((DIST / "bvp-deployment.json").read_text(encoding="utf-8"))
+        self.assertEqual(deployment["schema_version"], 1)
+        self.assertIn(deployment["provider"], {"cloudflare-pages", "local-ci"})
+        self.assertTrue(deployment["source_commit"])
+        self.assertTrue(deployment["source_branch"])
 
     def test_terms_page_exists_and_preserves_consumer_rights(self):
         terms = (DIST / "terms" / "index.html").read_text(encoding="utf-8")
