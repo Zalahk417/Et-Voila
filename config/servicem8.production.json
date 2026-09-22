@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "project": "voila-floor-care",
+  "environment": "production",
+  "observed_at": "2026-09-22",
+  "observed_via": "ServiceM8 connected app live read",
+  "write_enabled_by_default": false,
+  "gate2_reference_template": {
+    "name": "Quote - Carpet Cleaning",
+    "uuid": "01a0945e-8838-7d8b-a59b-20f7c531890d"
+  },
+  "template_catalogue": [
+    {
+      "name": "Quote - Carpet Cleaning",
+      "uuid": "01a0945e-8838-7d8b-a59b-20f7c531890d"
+    },
+    {
+      "name": "Quote - Tile & Grout",
+      "uuid": "01a0945e-f829-7d8b-a59a-4c3168d6f29d"
+    },
+    {
+      "name": "Quote - Upholstery & Mattress",
+      "uuid": "01a0945f-3d5e-7d8b-a59a-4a2862aad26d"
+    },
+    {
+      "name": "Quote - Hard Floor Restoration",
+      "uuid": "01a0945f-b046-7d8b-a59a-fbebca2ac13d"
+    },
+    {
+      "name": "Quote - Strip & Seal",
+      "uuid": "01a09460-02a2-7d8b-a59a-0568ce10c38d"
+    },
+    {
+      "name": "Quote - Natural Stone",
+      "uuid": "01a09469-2042-7d8b-a59b-0c24d78a76ad"
+    },
+    {
+      "name": "Quote - Concrete Floor Care",
+      "uuid": "01a09469-6c4d-7d8b-a59a-1acf1b85d9ad"
+    },
+    {
+      "name": "Quote - Commercial / Property Management",
+      "uuid": "01a09469-be65-7d8b-a59b-b039c88eee6d"
+    }
+  ],
+  "gate2_rules": {
+    "synthetic_company_name": "BVP CUSTOMER ZERO — DO NOT SERVICE",
+    "status_intent": "Quote",
+    "customer_communications_allowed": false,
+    "scheduling_allowed": false,
+    "invoicing_allowed": false,
+    "payment_allowed": false,
+    "template_selection_beyond_reference_test": "human_review"
+  }
+}
