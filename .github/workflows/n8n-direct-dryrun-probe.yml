@@ -19,7 +19,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat > payload.json <<'JSON'
+          cat > payload.json <<JSON
           {
             "source": "website",
             "customer_name": "BVP CUSTOMER ZERO — DO NOT SERVICE",
@@ -32,8 +32,8 @@ jobs:
             "preferred_timing": "none - do not schedule",
             "message": "[BVP-CZ] Synthetic integration test only. Do not contact, schedule, quote, invoice or service.",
             "privacy_consent": true,
-            "correlation_id": "github-n8n-direct-${GITHUB_RUN_ID}",
-            "idempotency_key": "github-n8n-direct-${GITHUB_RUN_ID}"
+            "correlation_id": "github-n8n-direct-$GITHUB_RUN_ID",
+            "idempotency_key": "github-n8n-direct-$GITHUB_RUN_ID"
           }
           JSON
 
