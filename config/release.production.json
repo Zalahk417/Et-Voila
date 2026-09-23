@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "project": "voila-floor-care",
+  "legal_entity": "Midwest Trade Hub Pty Ltd",
+  "repository": "Zalahk417/VOILA-FLOOR-CARE",
+  "release_state": "NOT_LAUNCH_GREEN",
+  "generated_from": {
+    "audit_snapshot_date": "2026-09-23",
+    "github_base_commit": "49b76f5812994a44e30581a99efe182e5f460758",
+    "ironclad_issue": 11
+  },
+  "root_variables": {
+    "launch_geography": {
+      "status": "UNRESOLVED",
+      "value": null
+    },
+    "gst_tax": {
+      "status": "NOT_READY",
+      "servicem8_observed": "NONE/0%"
+    },
+    "business_sender_identity": {
+      "status": "NOT_PROVEN",
+      "target_public_sender": "hello@voilafloor.com.au",
+      "target_intake_sender": "bookings@voilafloor.com.au"
+    },
+    "canonical_intake_path": {
+      "status": "UNRESOLVED",
+      "candidates": [
+        "servicem8_native",
+        "website_cloudflare_n8n_servicem8"
+      ]
+    },
+    "servicem8_tenant": {
+      "status": "PROVEN_CLEAN",
+      "production_population_complete": false
+    }
+  },
+  "runtime_gates": {
+    "servicem8_production_write": "NOT_PROVEN",
+    "provider_reread": "PARTIAL_HELPERS_ONLY",
+    "provider_replay_dedupe": "NOT_PROVEN",
+    "failure_recovery_reconciliation": "NOT_PROVEN",
+    "full_customer_zero": "NOT_PASSED",
+    "workspace_mail_identity": "NOT_PROVEN",
+    "custom_domain": "NEEDS_FRESH_PROOF"
+  },
+  "safety": {
+    "production_writes_authorised": false,
+    "customer_communications_allowed": false,
+    "scheduling_allowed": false,
+    "invoicing_allowed": false,
+    "payment_allowed": false
+  },
+  "release_rules": [
+    "Never infer runtime completion from staged or entitled configuration.",
+    "No LAUNCH_GREEN while any root variable is unresolved or any critical runtime gate is unproven.",
+    "Every mutable production capability requires provider read-back, replay safety, exercised failure handling, rollback and inspectable evidence.",
+    "ServiceM8 remains authoritative for routine customer lifecycle communications.",
+    "Historic Jim's customer migration/reactivation remains under legal hold until separately approved."
+  ]
+}
