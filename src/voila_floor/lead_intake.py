@@ -58,6 +58,16 @@ HIGH_RISK_PATTERNS = {
     "guarantee_request": r"\b(guarantee|100%|definitely remove|promise.*remove)\b",
     "insurance_or_liability": r"\b(insurance claim|liability|compensation|damages claim)\b",
     "urgent_health_safety": r"\b(asbestos|chemical spill|hazardous|toxic)\b",
+    "prompt_or_instruction_injection": (
+        r"\b(ignore|disregard|override|forget)\b.{0,80}"
+        r"\b(previous|prior|system|developer|assistant)\b.{0,40}"
+        r"\b(instruction|message|prompt|rule)s?\b"
+        r"|\b(system prompt|developer message|hidden prompt)\b"
+        r"|\b(reveal|show|print|return|expose)\b.{0,60}"
+        r"\b(api key|secret|system prompt|developer message|hidden prompt)\b"
+        r"|\b(call|use|execute|invoke)\b.{0,40}"
+        r"\b(tool|command|shell|terminal|function)\b"
+    ),
 }
 
 def _clean(value: Any) -> str:
