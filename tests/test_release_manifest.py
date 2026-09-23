@@ -6,6 +6,9 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(__file__))
 MANIFEST = os.path.join(ROOT, "config", "release.production.json")
 
+CLOSED_ROOT_STATES = {"LOCKED", "READY", "PROVEN", "PROVEN_CLEAN"}
+CLOSED_RUNTIME_STATES = {"PROVEN", "PASSED", "GREEN"}
+
 
 class ReleaseManifestTests(unittest.TestCase):
     @classmethod
@@ -16,19 +19,29 @@ class ReleaseManifestTests(unittest.TestCase):
     def test_manifest_uses_current_repository_identity(self):
         self.assertEqual(self.m["repository"], "Zalahk417/VOILA-FLOOR-CARE")
 
-    def test_launch_green_is_blocked_by_open_root_variables(self):
-        open_states = {"UNRESOLVED", "NOT_READY", "NOT_PROVEN"}
-        roots = self.m["root_variables"]
-        has_open_root = any(v["status"] in open_states for v in roots.values())
-        if has_open_root:
-            self.assertNotEqual(self.m["release_state"], "LAUNCH_GREEN")
+    def test_launch_green_requires_explicitly_closed_root_variables(self):
+        if self.m["release_state"] == "LAUNCH_GREEN":
+            roots = self.m["root_variables"]
+            for name, value in roots.items():
+                self.assertIn(
+                    value["status"],
+                    CLOSED_ROOT_STATES,
+                    f"root variable {name} is not explicitly closed",
+                )
 
-    def test_launch_green_is_blocked_by_open_runtime_gates(self):
-        closed_states = {"PROVEN", "PASSED", "GREEN"}
-        gates = self.m["runtime_gates"]
-        all_closed = all(v in closed_states for v in gates.values())
-        if not all_closed:
-            self.assertNotEqual(self.m["release_state"], "LAUNCH_GREEN")
+    def test_launch_green_requires_explicitly_closed_runtime_gates(self):
+        if self.m["release_state"] == "LAUNCH_GREEN":
+            for name, value in self.m["runtime_gates"].items():
+                self.assertIn(
+                    value,
+                    CLOSED_RUNTIME_STATES,
+                    f"runtime gate {name} is not explicitly closed",
+                )
+
+    def test_unknown_or_provisional_status_is_not_implicitly_green(self):
+        unsafe_states = {"PROVISIONAL", "PARTIAL", "UNKNOWN", "ASSUMED", "STAGED"}
+        self.assertTrue(unsafe_states.isdisjoint(CLOSED_ROOT_STATES))
+        self.assertTrue(unsafe_states.isdisjoint(CLOSED_RUNTIME_STATES))
 
     def test_mutating_customer_actions_remain_fail_closed_before_customer_zero(self):
         if self.m["runtime_gates"]["full_customer_zero"] != "PASSED":
