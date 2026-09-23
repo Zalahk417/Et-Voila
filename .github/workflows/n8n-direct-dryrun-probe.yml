@@ -1,0 +1,53 @@
+name: N8N Direct Dry-Run Probe
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/n8n-direct-dryrun-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: POST synthetic Customer Zero directly to n8n
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > payload.json <<'JSON'
+          {
+            "source": "website",
+            "customer_name": "BVP CUSTOMER ZERO — DO NOT SERVICE",
+            "phone": "0400 000 000",
+            "email": "bvp-customer-zero@example.invalid",
+            "job_address": "1 Test Street, Geraldton WA 6530",
+            "service": "carpet cleaning",
+            "customer_type": "domestic",
+            "measurements": "synthetic test",
+            "preferred_timing": "none - do not schedule",
+            "message": "[BVP-CZ] Synthetic integration test only. Do not contact, schedule, quote, invoice or service.",
+            "privacy_consent": true,
+            "correlation_id": "github-n8n-direct-${GITHUB_RUN_ID}",
+            "idempotency_key": "github-n8n-direct-${GITHUB_RUN_ID}"
+          }
+          JSON
+
+          code="$(curl -sS             -X POST "https://pmhk.app.n8n.cloud/webhook/voila-floor-lead-intake"             -H "content-type: application/json"             --data-binary @payload.json             -o response.json             -w '%{http_code}')"
+
+          echo "HTTP $code"
+          cat response.json
+          echo
+
+          python - <<'PY'
+          import json
+          response = json.load(open("response.json", encoding="utf-8"))
+          assert response.get("stage") == "DRY_RUN_NO_WRITES", response
+          assert response.get("lead", {}).get("service") == "carpet_cleaning", response
+          assert response.get("human_review_required") is False, response
+          print("PASS: n8n direct dry-run accepted and normalised Customer Zero")
+          PY
