@@ -8,10 +8,10 @@ from voila_floor.servicem8 import ServiceM8Client
 
 RELEASE_1 = {
     "queue": [
-        {"name": "Lead Follow-Up", "default_timeframe": 2, "requires_assignment": 0},
-        {"name": "Awaiting Customer Access", "default_timeframe": 7, "requires_assignment": 0},
-        {"name": "Awaiting Deposit Payment", "default_timeframe": 3, "requires_assignment": 0},
-        {"name": "Ready to Schedule", "default_timeframe": 2, "requires_assignment": 0},
+        {"name": "Lead Follow-Up"},
+        {"name": "Awaiting Customer Access"},
+        {"name": "Awaiting Deposit Payment"},
+        {"name": "Ready to Schedule"},
     ],
     "badge": [
         {"name": "Intake Review"},
