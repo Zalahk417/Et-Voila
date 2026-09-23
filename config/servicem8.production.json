@@ -1,38 +1,141 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "project": "voila-floor-care",
   "environment": "production",
-  "observed_at": "2026-09-23",
+  "observed_at": "2026-09-24T00:08:08+08:00",
   "observed_via": "ServiceM8 connected app live read",
   "write_enabled_by_default": false,
   "tenant_identity": {
-    "staff": [{"name":"Paul-Michael Haik","uuid":"01a0c8ff-7d66-73c0-b292-1bc897ceb41b"}],
+    "staff": [
+      {
+        "name": "Paul-Michael Haik",
+        "uuid": "01a0c8ff-7d66-73c0-b292-1bc897ceb41b"
+      }
+    ],
     "sample_job_only": true,
     "knowledge_management_active": false
   },
   "live_configuration": {
     "categories": [
-      {"name":"Standard","uuid":"01a0c8ff-df54-7f59-93f1-22a75952869b"},
-      {"name":"VIP","uuid":"01a0c8ff-e233-7f59-93f0-67db1c47bcfb"},
-      {"name":"Warranty","uuid":"01a0c8ff-e50c-7f59-93f0-b10766119b8b"},
-      {"name":"After-Hours","uuid":"01a0c8ff-e7e6-7f59-93f1-059d9a4cb4db"}
+      {
+        "name": "Standard",
+        "uuid": "01a0c8ff-df54-7f59-93f1-22a75952869b"
+      },
+      {
+        "name": "VIP",
+        "uuid": "01a0c8ff-e233-7f59-93f0-67db1c47bcfb"
+      },
+      {
+        "name": "Warranty",
+        "uuid": "01a0c8ff-e50c-7f59-93f0-b10766119b8b"
+      },
+      {
+        "name": "After-Hours",
+        "uuid": "01a0c8ff-e7e6-7f59-93f1-059d9a4cb4db"
+      }
     ],
     "badges": [
-      {"name":"Warranty","uuid":"01a0c900-d7ba-7f59-93f1-c1022c0d33ab"},
-      {"name":"VIP","uuid":"01a0c900-daa5-7f59-93f0-cc4c925ae5ab"},
-      {"name":"Take Payment Facilities","uuid":"01a0c900-dd83-7f59-93f0-6c52d9a0b94b"}
+      {
+        "name": "Warranty",
+        "uuid": "01a0c900-d7ba-7f59-93f1-c1022c0d33ab"
+      },
+      {
+        "name": "VIP",
+        "uuid": "01a0c900-daa5-7f59-93f0-cc4c925ae5ab"
+      },
+      {
+        "name": "Take Payment Facilities",
+        "uuid": "01a0c900-dd83-7f59-93f0-6c52d9a0b94b"
+      },
+      {
+        "name": "Intake Review",
+        "uuid": "01a0ce80-307e-7f59-93f0-362a0a05f7cb"
+      },
+      {
+        "name": "Urgent",
+        "uuid": "01a0ce80-3e18-7f59-93f1-e02bb15c66db"
+      },
+      {
+        "name": "Deposit Required",
+        "uuid": "01a0ce80-4af7-7f59-93f1-19a6d86d4c8b"
+      },
+      {
+        "name": "Complaint/Rework",
+        "uuid": "01a0ce80-5b77-7f59-93f0-0a7c8f12450b"
+      },
+      {
+        "name": "Do Not Request Review",
+        "uuid": "01a0ce80-67ea-7f59-93f1-9433899ea10b"
+      },
+      {
+        "name": "Commercial Prospect",
+        "uuid": "01a0ce80-7632-7f59-93f1-92d19360d7ab"
+      },
+      {
+        "name": "Property Manager",
+        "uuid": "01a0ce80-8505-7f59-93f1-da806009a84b"
+      },
+      {
+        "name": "Photo Pack",
+        "uuid": "01a0ce80-9165-7f59-93f1-05b1c55a638b"
+      },
+      {
+        "name": "Form Required",
+        "uuid": "01a0ce80-a081-7f59-93f0-f354b1335a0b"
+      }
     ],
     "queues": [
-      {"name":"Workshop","uuid":"01a0c8ff-eac4-7f59-93f1-0d0680b1051b"},
-      {"name":"Pending Quotes","uuid":"01a0c8ff-edb5-7f59-93f0-524d90ec314b"},
-      {"name":"Parts on Order","uuid":"01a0c8ff-f095-7f59-93f1-60b0947abecb"}
+      {
+        "name": "Workshop",
+        "uuid": "01a0c8ff-eac4-7f59-93f1-0d0680b1051b"
+      },
+      {
+        "name": "Pending Quotes",
+        "uuid": "01a0c8ff-edb5-7f59-93f0-524d90ec314b"
+      },
+      {
+        "name": "Parts on Order",
+        "uuid": "01a0c8ff-f095-7f59-93f1-60b0947abecb"
+      },
+      {
+        "name": "Awaiting Customer Access",
+        "uuid": "01a0ce7f-f530-7f59-93f0-d28e53594a6b"
+      },
+      {
+        "name": "Awaiting Deposit Payment",
+        "uuid": "01a0ce80-03e4-7f59-93f1-57cca3f5e46b"
+      },
+      {
+        "name": "Lead Follow-Up",
+        "uuid": "01a0ce80-1297-7f59-93f0-b46b4afedd4b"
+      },
+      {
+        "name": "Ready to Schedule",
+        "uuid": "01a0ce80-218f-7f59-93f1-2d4ce275704b"
+      }
     ],
     "forms": [],
     "job_templates": [],
-    "tax_rates": [{"name":"NONE","amount":"0.0000","is_default":true}]
+    "tax_rates": [
+      {
+        "name": "NONE",
+        "amount": "0.0000",
+        "is_default": true
+      }
+    ]
+  },
+  "runtime_observations": {
+    "release1_control_badges_present": 9,
+    "release1_control_queues_present": 4,
+    "release1_controls_provider_readback_proven": true,
+    "forms_present": 0,
+    "job_templates_present": 0,
+    "tax_default_is_zero": true,
+    "knowledge_search_result": "Knowledge Management is not activated for this account"
   },
   "readiness": {
     "tenant_clean": true,
+    "release1_controls_deployed": true,
     "vfc_operational_population_complete": false,
     "tax_configuration_ready": false,
     "knowledge_ready": false,
