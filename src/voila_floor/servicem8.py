@@ -110,6 +110,87 @@ class ServiceM8Client:
         if not uuid: raise ServiceM8Error("ServiceM8 did not return x-record-uuid for job creation")
         return uuid
 
+    # Documented ServiceM8 REST resources used by the backend admin bridge.
+    # Keep this allowlist explicit: arbitrary paths are intentionally not exposed.
+    ADMIN_RESOURCES = {
+        "queue": "queue",
+        "badge": "badge",
+        "category": "category",
+        "material": "material",
+        "form": "form",
+        "formfield": "formfield",
+        "documenttemplate": "documenttemplate",
+    }
+
+    def list_records(self, resource: str) -> list[dict[str, Any]]:
+        endpoint = self._admin_endpoint(resource)
+        data, _ = self._request("GET", f"{endpoint}.json")
+        if isinstance(data, list):
+            return [item for item in data if isinstance(item, dict)]
+        if isinstance(data, dict):
+            for key in ("data", "results"):
+                value = data.get(key)
+                if isinstance(value, list):
+                    return [item for item in value if isinstance(item, dict)]
+        raise ServiceM8Error(f"Unexpected {resource} list response")
+
+    def create_record(self, resource: str, payload: dict[str, Any]) -> str:
+        self._assert_write_enabled()
+        endpoint = self._admin_endpoint(resource)
+        _, headers = self._request("POST", f"{endpoint}.json", payload)
+        uuid = headers.get("x-record-uuid", "")
+        if not uuid:
+            raise ServiceM8Error(f"ServiceM8 did not return x-record-uuid for {resource} creation")
+        return uuid
+
+    def update_record(self, resource: str, uuid: str, payload: dict[str, Any]) -> None:
+        self._assert_write_enabled()
+        endpoint = self._admin_endpoint(resource)
+        self._request("POST", f"{endpoint}/{urllib.parse.quote(uuid)}.json", payload)
+
+    def delete_record(self, resource: str, uuid: str) -> None:
+        self._assert_write_enabled()
+        endpoint = self._admin_endpoint(resource)
+        self._request("DELETE", f"{endpoint}/{urllib.parse.quote(uuid)}.json")
+
+    def ensure_named_record(
+        self,
+        resource: str,
+        name: str,
+        payload: dict[str, Any] | None = None,
+    ) -> tuple[str, bool]:
+        """Return (uuid, created). Create only when no exact-name record exists."""
+        wanted = name.strip()
+        if not wanted:
+            raise ServiceM8Error("Record name is required")
+        matches = [
+            row for row in self.list_records(resource)
+            if str(row.get("name", "")).strip() == wanted
+        ]
+        if len(matches) > 1:
+            raise ServiceM8Error(f"Duplicate {resource} records already exist for exact name: {wanted}")
+        if matches:
+            uuid = str(matches[0].get("uuid", "")).strip()
+            if not uuid:
+                raise ServiceM8Error(f"Existing {resource} record has no uuid: {wanted}")
+            return uuid, False
+        body = dict(payload or {})
+        body["name"] = wanted
+        uuid = self.create_record(resource, body)
+        reread = [
+            row for row in self.list_records(resource)
+            if str(row.get("name", "")).strip() == wanted
+        ]
+        if len(reread) != 1 or str(reread[0].get("uuid", "")).strip() != uuid:
+            raise ServiceM8Error(f"Read-back verification failed for {resource}: {wanted}")
+        return uuid, True
+
+    def _admin_endpoint(self, resource: str) -> str:
+        try:
+            return self.ADMIN_RESOURCES[resource]
+        except KeyError as exc:
+            raise ServiceM8Error(f"Unsupported admin resource: {resource}") from exc
+
     def _assert_write_enabled(self) -> None:
         if not self.allow_writes:
             raise ServiceM8Error("ServiceM8 write blocked: set VOILA_ALLOW_SERVICEM8_WRITES=true only after staging tests and owner approval")
