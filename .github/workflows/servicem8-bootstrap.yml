@@ -1,0 +1,44 @@
+name: Voilà ServiceM8 Bootstrap
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/servicem8-bootstrap.yml"
+      - "scripts/servicem8_bootstrap.py"
+      - "config/servicem8.bootstrap.manifest.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SERVICEM8_API_KEY: ${{ secrets.SERVICEM8_API_KEY || secrets.VFC_SERVICEM8_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify ServiceM8 credential is registered
+        shell: bash
+        run: |
+          if [ -z "${SERVICEM8_API_KEY:-}" ]; then
+            echo "::error::Neither SERVICEM8_API_KEY nor VFC_SERVICEM8_API_KEY is registered in this repository."
+            exit 3
+          fi
+
+      - name: Populate approved Voilà ServiceM8 configuration
+        shell: bash
+        run: python scripts/servicem8_bootstrap.py
+
+      - name: Upload bootstrap evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: servicem8-bootstrap-evidence
+          path: servicem8-bootstrap-evidence.json
+          if-no-files-found: warn
+          retention-days: 30
