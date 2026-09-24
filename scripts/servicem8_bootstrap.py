@@ -178,8 +178,21 @@ def main():
     gst = next((r for r in tax_rates if (r.get("name") or "").upper() == "GST" and float(r.get("amount") or 0) == 10.0 and str(r.get("is_default_tax_rate", "0")) == "1"), None)
     if not gst:
         gst = next((r for r in tax_rates if (r.get("name") or "").upper() == "GST" and float(r.get("amount") or 0) == 10.0), None)
+
+    # Catalogue line items require a valid 10% GST record. If the clean tenant
+    # does not have one yet, create it without changing the account-wide
+    # default tax policy. Making GST the default remains an explicit launch
+    # decision because it affects future quotes/invoices globally.
+    gst_created = False
     if not gst:
-        raise SM8Error("No 10% GST tax rate found; refusing to create catalogue")
+        gst_uuid = create("taxrate.json", {"name": "GST", "amount": "10", "is_default_tax_rate": 0})
+        tax_rates = active(get_list("taxrate.json"))
+        gst = next((r for r in tax_rates if (r.get("uuid") or "") == gst_uuid), None)
+        if not gst:
+            gst = next((r for r in tax_rates if (r.get("name") or "").upper() == "GST" and float(r.get("amount") or 0) == 10.0), None)
+        gst_created = True
+    if not gst:
+        raise SM8Error("Unable to establish a 10% GST tax rate; refusing to create catalogue")
 
     # Safe bootstrap writes: create missing categories. Queues/badges are also
     # checked idempotently; current duplicates are reported, never multiplied.
@@ -204,6 +217,13 @@ def main():
         "project": "voila-floor-care",
         "target": "ServiceM8 clean Voilà tenant",
         "manifest_items": len(manifest["materials"]),
+        "tax_rate": {
+            "name": gst.get("name"),
+            "amount": gst.get("amount"),
+            "uuid": gst.get("uuid"),
+            "created": gst_created,
+            "is_default_tax_rate": gst.get("is_default_tax_rate"),
+        },
         "result": {
             "categories": categories,
             "queues": queues,
