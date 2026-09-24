@@ -70,6 +70,91 @@ def exact_name_counts(records):
     return Counter((r.get("name") or "").strip() for r in active(records))
 
 
+def archive_record(endpoint: str, uuid: str) -> None:
+    resource = endpoint[:-5] if endpoint.endswith(".json") else endpoint
+    request("DELETE", f"{resource}/{uuid}.json")
+
+
+def dedupe_named(endpoint: str, desired: list[str]):
+    rows = active(get_list(endpoint))
+    archived = []
+    kept = []
+    for name in desired:
+        matches = sorted(
+            [r for r in rows if (r.get("name") or "").strip() == name],
+            key=lambda r: (r.get("uuid") or ""),
+        )
+        if not matches:
+            continue
+        keeper = matches[0]
+        kept.append({"name": name, "uuid": keeper.get("uuid")})
+        for extra in matches[1:]:
+            uuid = extra.get("uuid") or ""
+            if uuid:
+                archive_record(endpoint, uuid)
+                archived.append({"name": name, "uuid": uuid})
+    return {"kept": kept, "archived": archived}
+
+
+def dedupe_materials(items: list[dict]):
+    desired_codes = {item["item_number"] for item in items}
+    rows = active(get_list("material.json"))
+    groups = {}
+    for r in rows:
+        code = (r.get("item_number") or "").strip()
+        if code in desired_codes:
+            groups.setdefault(code, []).append(r)
+    archived = []
+    kept = []
+    for code, matches in groups.items():
+        matches = sorted(matches, key=lambda r: (r.get("uuid") or ""))
+        keeper = matches[0]
+        kept.append({"item_number": code, "name": keeper.get("name"), "uuid": keeper.get("uuid")})
+        for extra in matches[1:]:
+            uuid = extra.get("uuid") or ""
+            if uuid:
+                archive_record("material.json", uuid)
+                archived.append({"item_number": code, "name": extra.get("name"), "uuid": uuid})
+    return {"kept": kept, "archived": archived}
+
+
+def ensure_gst_rate():
+    tax_rates = active(get_list("taxrate.json"))
+    matches = [
+        r for r in tax_rates
+        if (r.get("name") or "").upper() == "GST"
+        and float(r.get("amount") or 0) == 10.0
+    ]
+    created = False
+    archived = []
+    if not matches:
+        gst_uuid = create("taxrate.json", {"name": "GST", "amount": "10", "is_default_tax_rate": 0})
+        tax_rates = active(get_list("taxrate.json"))
+        matches = [
+            r for r in tax_rates
+            if (r.get("uuid") or "") == gst_uuid
+            or ((r.get("name") or "").upper() == "GST" and float(r.get("amount") or 0) == 10.0)
+        ]
+        created = True
+    if not matches:
+        raise SM8Error("Unable to establish a 10% GST tax rate; refusing to create catalogue")
+
+    matches = sorted(
+        matches,
+        key=lambda r: (
+            0 if str(r.get("is_default_tax_rate", "0")) == "1" else 1,
+            r.get("uuid") or "",
+        ),
+    )
+    gst = matches[0]
+    for extra in matches[1:]:
+        uuid = extra.get("uuid") or ""
+        if uuid:
+            archive_record("taxrate.json", uuid)
+            archived.append({"name": extra.get("name"), "amount": extra.get("amount"), "uuid": uuid})
+    return gst, created, archived
+
+
 def ensure_named(endpoint: str, desired: list[str], extra=None):
     rows = get_list(endpoint)
     counts = exact_name_counts(rows)
@@ -174,28 +259,20 @@ def main():
     if not staff:
         raise SM8Error("Authenticated tenant returned no staff; refusing bootstrap")
 
-    tax_rates = active(get_list("taxrate.json"))
-    gst = next((r for r in tax_rates if (r.get("name") or "").upper() == "GST" and float(r.get("amount") or 0) == 10.0 and str(r.get("is_default_tax_rate", "0")) == "1"), None)
-    if not gst:
-        gst = next((r for r in tax_rates if (r.get("name") or "").upper() == "GST" and float(r.get("amount") or 0) == 10.0), None)
+    # Repair duplicate records left by any earlier concurrent bootstrap runs.
+    # All cleanup is scoped to the approved Voilà manifest and uses ServiceM8
+    # soft-delete semantics, so archived duplicates remain recoverable.
+    duplicate_cleanup = {
+        "categories": dedupe_named("category.json", manifest["categories"]),
+        "queues": dedupe_named("queue.json", manifest["queues"]),
+        "badges": dedupe_named("badge.json", manifest["badges"]),
+        "materials": dedupe_materials(manifest["materials"]),
+    }
+    gst, gst_created, gst_archived = ensure_gst_rate()
+    duplicate_cleanup["gst"] = {"archived": gst_archived}
 
-    # Catalogue line items require a valid 10% GST record. If the clean tenant
-    # does not have one yet, create it without changing the account-wide
-    # default tax policy. Making GST the default remains an explicit launch
-    # decision because it affects future quotes/invoices globally.
-    gst_created = False
-    if not gst:
-        gst_uuid = create("taxrate.json", {"name": "GST", "amount": "10", "is_default_tax_rate": 0})
-        tax_rates = active(get_list("taxrate.json"))
-        gst = next((r for r in tax_rates if (r.get("uuid") or "") == gst_uuid), None)
-        if not gst:
-            gst = next((r for r in tax_rates if (r.get("name") or "").upper() == "GST" and float(r.get("amount") or 0) == 10.0), None)
-        gst_created = True
-    if not gst:
-        raise SM8Error("Unable to establish a 10% GST tax rate; refusing to create catalogue")
-
-    # Safe bootstrap writes: create missing categories. Queues/badges are also
-    # checked idempotently; current duplicates are reported, never multiplied.
+    # Safe bootstrap writes: create anything from the approved manifest that is
+    # still missing after cleanup.
     categories = ensure_named("category.json", manifest["categories"])
     queues = ensure_named("queue.json", manifest["queues"], lambda _n: {"requires_assignment": 0, "default_timeframe": 0})
     badges = ensure_named("badge.json", manifest["badges"])
@@ -224,6 +301,7 @@ def main():
             "created": gst_created,
             "is_default_tax_rate": gst.get("is_default_tax_rate"),
         },
+        "duplicate_cleanup": duplicate_cleanup,
         "result": {
             "categories": categories,
             "queues": queues,
