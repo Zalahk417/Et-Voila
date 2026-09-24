@@ -1,0 +1,46 @@
+name: Inspect n8n ServiceM8 backend
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/inspect-n8n-servicem8.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+      N8N_BASE_URL: ${{ secrets.N8N_BASE_URL }}
+    steps:
+      - name: Read n8n workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${N8N_API_KEY:?N8N_API_KEY missing}"
+          BASE="${N8N_BASE_URL:-https://pmhk.app.n8n.cloud/api/v1}"
+          BASE="${BASE%/}"
+          case "$BASE" in
+            */api/v1) ;;
+            *) BASE="$BASE/api/v1" ;;
+          esac
+          curl -fsS "$BASE/workflows?limit=250" \
+            -H "X-N8N-API-KEY: $N8N_API_KEY" \
+            -H "accept: application/json" \
+            -o workflows.json
+          python - <<'PY'
+          import json, re
+          data=json.load(open("workflows.json",encoding="utf-8"))
+          rows=data.get("data",data if isinstance(data,list) else [])
+          keep=[]
+          for w in rows:
+              name=w.get("name","")
+              if re.search(r"(servicem8|service.?m8|release.?1|bootstrap|customer.?zero|voil)", name, re.I):
+                  keep.append({k:w.get(k) for k in ("id","name","active","updatedAt","createdAt")})
+          print(json.dumps({"count":len(rows),"matches":keep},indent=2,ensure_ascii=False))
+          PY
