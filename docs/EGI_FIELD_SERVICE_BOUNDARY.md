@@ -2,7 +2,7 @@
 
 Voilà Floor Care is the reference implementation of the EGI `field-service` Cell archetype.
 
-Canonical architecture, ports/adapters, binding contracts, generic provider transport, reconciliation primitives, evidence rules and durable obligations live in:
+Generic ServiceM8 transport, canonical architecture, ports/adapters, binding contracts, reconciliation primitives, evidence rules and durable obligations live in:
 
 `Zalahk417/Zalahk417-ai-operations-system`
 
