@@ -10,6 +10,12 @@ The repository keeps the stable technical name `Et-Voila`; customer-facing and o
 
 The repository defaults to **dry-run**. It will not create ServiceM8 jobs unless `VOILA_ALLOW_SERVICEM8_WRITES=true` is set intentionally.
 
+## EGI Cell boundary
+
+Voilà is the reference **field-service Cell**, not a standalone control plane. Generic ServiceM8 transport, bindings, reconciliation, evidence and durable obligations are canonical in the EGI repository; this repository owns Voilà-specific catalogue, pricing, forms/templates, customer policy, website and acceptance tests. Existing direct ServiceM8 code here is a compatibility facade, not the place to evolve shared provider plumbing.
+
+See `docs/EGI_FIELD_SERVICE_BOUNDARY.md`.
+
 ## Design rules
 
 - ServiceM8 remains the operational system of record.
