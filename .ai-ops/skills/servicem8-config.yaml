@@ -3,6 +3,12 @@ id: voila.servicem8-config
 name: Voilà — ServiceM8 Configuration & Audit
 version: 1.0.0
 purpose: Audit and configure Voilà Floor Care's ServiceM8 operating layer while preserving legitimate historical records and preventing unverified configuration claims.
+architecture:
+  operating_model: cell
+  archetype: field-service
+  kernel_owner: Zalahk417/Zalahk417-ai-operations-system
+  canonical_generic_servicem8_primitives: automation/providers/servicem8
+  local_code_role: compatibility_facade_until_verified_cutover
 trigger:
   - servicem8_audit_request
   - servicem8_configuration_request
