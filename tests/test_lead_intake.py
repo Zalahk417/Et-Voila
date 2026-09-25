@@ -95,6 +95,36 @@ class LeadIntakeTests(unittest.TestCase):
         self.assertEqual(enabled.last[1], "jobtemplate/template-1/job.json")
         self.assertEqual(enabled.last[2]["company_name"], "BVP CUSTOMER ZERO — DO NOT SERVICE")
 
+
+    def test_admin_create_is_write_guarded(self):
+        class Fake(ServiceM8Client):
+            def _request(self, method, path, payload=None):
+                self.last = (method, path, payload)
+                return None, {"x-record-uuid": "queue-1"}
+        blocked = Fake(api_key="fake", allow_writes=False)
+        with self.assertRaises(ServiceM8Error):
+            blocked.create_record("queue", {"name": "Lead Follow-Up"})
+        enabled = Fake(api_key="fake", allow_writes=True)
+        uuid = enabled.create_record("queue", {"name": "Lead Follow-Up"})
+        self.assertEqual(uuid, "queue-1")
+        self.assertEqual(enabled.last, ("POST", "queue.json", {"name": "Lead Follow-Up"}))
+
+    def test_ensure_named_record_is_idempotent(self):
+        class Existing(ServiceM8Client):
+            def _request(self, method, path, payload=None):
+                self.last = (method, path, payload)
+                return [{"uuid": "badge-1", "name": "Urgent"}], {}
+        client = Existing(api_key="fake", allow_writes=True)
+        uuid, created = client.ensure_named_record("badge", "Urgent")
+        self.assertEqual(uuid, "badge-1")
+        self.assertFalse(created)
+        self.assertEqual(client.last[0], "GET")
+
+    def test_admin_resource_allowlist_fails_closed(self):
+        client = ServiceM8Client(api_key="fake", allow_writes=True)
+        with self.assertRaises(ServiceM8Error):
+            client.create_record("arbitrary_endpoint", {"name": "nope"})
+
 class OpenAIResponseParsingTests(unittest.TestCase):
     def test_extract_output_text(self):
         from voila_floor.openai_extract import extract_output_text
