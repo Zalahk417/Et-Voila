@@ -10,6 +10,12 @@ The repository keeps the stable technical name `Et-Voila`; customer-facing and o
 
 The repository defaults to **dry-run**. It will not create ServiceM8 jobs unless `VOILA_ALLOW_SERVICEM8_WRITES=true` is set intentionally.
 
+## EGI operating model
+
+Voilà is an EGI **Cell** using the reusable `field-service` archetype. The EGI Kernel owns generic provider transport, bindings, reconciliation, evidence and obligations; this repository owns Voilà-specific desired state and business rules. See `docs/EGI_FIELD_SERVICE_CELL.md`.
+
+Operational/debug chats are disposable **Runs** and must write durable outcomes back to ServiceM8, this repository or EGI rather than becoming new architecture.
+
 ## Design rules
 
 - ServiceM8 remains the operational system of record.
