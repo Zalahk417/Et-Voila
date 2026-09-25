@@ -13,7 +13,9 @@
 
 ## ServiceM8
 
-For a private integration to the business' own account, generate an API key in ServiceM8 **Settings -> API Keys** and store it as `SERVICEM8_API_KEY` in runtime secrets.
+**Production authority:** reuse the registered EGI binding for Voilà ServiceM8. Do not ask the owner to re-enter or copy an existing secret merely because a chat surface lacks a direct tool. The governed preferred path is direct/native API where available, otherwise the registered backend/n8n credential path with independent ServiceM8 read-back.
+
+The `SERVICEM8_API_KEY` flow below remains a local-development compatibility path only. For a new isolated private integration, generate a scoped API key in ServiceM8 **Settings -> API Keys** and store it only in the authorised runtime secret store.
 
 Base URL: `https://api.servicem8.com/api_1.0`
 
