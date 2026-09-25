@@ -1,3 +1,10 @@
+"""Voilà-specific ServiceM8 compatibility facade.
+
+Generic ServiceM8 transport and credential/binding behaviour are canonical in
+the EGI repository. Keep this module scoped to current Voilà direct-runtime
+compatibility; do not evolve it into a second shared provider SDK.
+"""
+
 from __future__ import annotations
 
 import json
