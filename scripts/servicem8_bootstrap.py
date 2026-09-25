@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""Voilà desired-state bootstrap compatibility path.
+
+The catalogue and Voilà configuration belong here. Generic ServiceM8 transport,
+credential resolution, reconciliation and evidence contracts belong in EGI.
+Retain this script until a shared EGI runtime package is safely consumable here.
+"""
 from __future__ import annotations
 
 import json
